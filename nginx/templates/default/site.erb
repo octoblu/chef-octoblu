@@ -2,7 +2,7 @@ server {
   listen   80;
   server_name  <%= @application[:domains].join(" ") %> <%= node[:hostname] %>;
   access_log  <%= node[:nginx][:log_dir] %>/<%= @application[:domains].first %>.access.log;
-  add_header Access-Control-Allow-Origin *.octoblu.com;
+  add_header Access-Control-Allow-Origin *;
 
   location / {
     root   <%= @application[:absolute_document_root] %>;
@@ -33,7 +33,7 @@ server {
   listen   443;
   server_name  <%= @application[:domains].join(" ") %> <%= node[:hostname] %>;
   access_log  <%= node[:nginx][:log_dir] %>/<%= @application[:domains].first %>-ssl.access.log;
-  add_header Access-Control-Allow-Origin *.octoblu.com;
+  add_header Access-Control-Allow-Origin *;
 
   ssl on;
   ssl_certificate /etc/nginx/ssl/<%= @application[:domains].first %>.crt;
