@@ -4,30 +4,14 @@ server {
   access_log  <%= node[:nginx][:log_dir] %>/<%= @application[:domains].first %>.access.log;
   add_header Access-Control-Allow-Origin *;
 
-  return 301 https://$server_name$request_uri;
-
-  location /nginx_status {
-    stub_status on;
-    access_log off;
-    allow 127.0.0.1;
-    deny all;
+  if ($http_x_forwarded_proto = 'http') {
+    return 301 https://yourdomain.com$request_uri;
   }
 
-}
-
-<% if @application[:ssl_support] %>
-server {
-  listen   443;
-  server_name  <%= @application[:domains].join(" ") %> <%= node[:hostname] %>;
-  access_log  <%= node[:nginx][:log_dir] %>/<%= @application[:domains].first %>-ssl.access.log;
-  add_header Access-Control-Allow-Origin *;
-
-  ssl on;
-  ssl_certificate /etc/nginx/ssl/<%= @application[:domains].first %>.crt;
-  ssl_certificate_key /etc/nginx/ssl/<%= @application[:domains].first %>.key;
-  <% if @application[:ssl_certificate_ca] -%>
-  ssl_client_certificate /etc/nginx/ssl/<%= @application[:domains].first %>.ca;
-  <% end -%>
+  location ~* /(angular|assets|lib|pages) {
+    root   <%= @application[:absolute_document_root] %>;
+    try_files $uri =404;
+  }
 
   location / {
     root   <%= @application[:absolute_document_root] %>;
@@ -50,5 +34,5 @@ server {
     allow 127.0.0.1;
     deny all;
   }
+
 }
-<% end %>
