@@ -59,17 +59,6 @@ backend rails_app_servers
   <% end -%>
 <% end -%>
 
-<% if !node[:haproxy][:rails_backends].empty? -%>
-backend rails_app_servers_ssl
-  mode tcp
-  balance <%= node[:haproxy][:balance] %>
-  option redispatch
-  option ssl-hello-chk
-  <% node[:haproxy][:rails_backends].each do |backend| -%>
-  server <%= backend['name'] %> <%= backend['ip'] %>:443 weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_rails_app_ssl] %> check inter <%= node[:haproxy][:check_interval] %>
-  <% end -%>
-<% end -%>
-
 <% if !node[:haproxy][:php_backends].empty? -%>
 backend php_app_servers
   balance <%= node[:haproxy][:balance] %>
@@ -78,17 +67,6 @@ backend php_app_servers
   option httpchk <%= node[:haproxy][:health_check_method] %> <%= node[:haproxy][:health_check_url] %>
   <% node[:haproxy][:php_backends].each do |backend| -%>
   server <%= backend['name'] %> <%= backend['ip'] %>:80 weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_php_app] %> check inter <%= node[:haproxy][:check_interval] %>
-  <% end -%>
-<% end -%>
-
-<% if !node[:haproxy][:php_backends].empty? -%>
-backend php_app_servers_ssl
-  mode tcp
-  balance <%= node[:haproxy][:balance] %>
-  option redispatch
-  option ssl-hello-chk
-  <% node[:haproxy][:php_backends].each do |backend| -%>
-  server <%= backend['name'] %> <%= backend['ip'] %>:443 weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_php_app_ssl] %> check inter <%= node[:haproxy][:check_interval] %>
   <% end -%>
 <% end -%>
 
@@ -103,17 +81,6 @@ backend nodejs_app_servers
   <% end -%>
 <% end -%>
 
-<% if !node[:haproxy][:nodejs_backends].empty? -%>
-backend nodejs_app_servers_ssl
-  mode tcp
-  balance <%= node[:haproxy][:balance] %>
-  option redispatch
-  option ssl-hello-chk
-  <% node[:haproxy][:nodejs_backends].each do |backend| -%>
-  server <%= backend['name'] %> <%= backend['ip'] %>:443 weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_nodejs_app_ssl] %> check inter <%= node[:haproxy][:check_interval] %>
-  <% end -%>
-<% end -%>
-
 <% if !node[:haproxy][:static_backends].empty? -%>
 backend static_servers
   balance <%= node[:haproxy][:balance] %>
@@ -125,17 +92,6 @@ backend static_servers
   <% end -%>
 <% end -%>
 
-<% if !node[:haproxy][:static_backends].empty? -%>
-backend static_servers_ssl
-  mode tcp
-  balance <%= node[:haproxy][:balance] %>
-  option redispatch
-  option ssl-hello-chk
-  <% node[:haproxy][:static_backends].each do |backend| -%>
-  server <%= backend['name'] %> <%= backend['ip'] %>:443 weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_static_ssl] %> check inter <%= node[:haproxy][:check_interval] %>
-  <% end -%>
-<% end -%>
-
 <% if !node[:haproxy][:java_backends].empty? -%>
 backend java_servers
   balance <%= node[:haproxy][:balance] %>
@@ -144,17 +100,6 @@ backend java_servers
   option httpchk <%= node[:haproxy][:health_check_method] %> <%= node[:haproxy][:health_check_url] %>
   <% node[:haproxy][:java_backends].each do |backend| -%>
   server <%= backend['name'] %> <%= backend['ip'] %>:80 weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_java_app] %> check inter <%= node[:haproxy][:check_interval] %>
-  <% end -%>
-<% end -%>
-
-<% if !node[:haproxy][:java_backends].empty? -%>
-backend java_servers_ssl
-  mode tcp
-  balance <%= node[:haproxy][:balance] %>
-  option redispatch
-  option ssl-hello-chk
-  <% node[:haproxy][:java_backends].each do |backend| -%>
-  server <%= backend['name'] %> <%= backend['ip'] %>:443 weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_java_app_ssl] %> check inter <%= node[:haproxy][:check_interval] %>
   <% end -%>
 <% end -%>
 
@@ -178,15 +123,5 @@ frontend http-in
   <% end -%>
 
   default_backend static_servers
-
-frontend https-in
-  mode tcp
-  bind :443
-
-  acl nodejs_applications_ssl path_beg /api /auth /connect /unlink
-
-  use_backend nodejs_app_servers_ssl if nodejs_applications_ssl
-
-  default_backend static_servers_ssl
 
 <% end -%>
