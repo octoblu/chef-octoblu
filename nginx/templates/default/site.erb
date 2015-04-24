@@ -9,12 +9,12 @@ server {
   }
 
   location ~* /(angular|assets|lib|pages) {
-    root   <%= @application[:absolute_document_root] %>;
+    root   <%= @application[:absolute_document_root] %>public/;
     try_files $uri =404;
   }
 
   location / {
-    root   <%= @application[:absolute_document_root] %>;
+    root   <%= @application[:absolute_document_root] %>public/;
     try_files $uri /index.html;
   }
 
